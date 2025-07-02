@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PNC Bank | Pay Bills</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: #003366;
+            --accent-orange: #FF8200;
+            --light-gray: #F5F5F5;
+            --dark-gray: #333333;
+            --white: #FFFFFF;
+            --success-green: #28a745;
+            --error-red: #dc3545;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .dashboard-header {
+            background-color: var(--white);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo img {
+            height: 30px;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--primary-blue);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--primary-blue);
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        /* Main Content */
+        .dashboard-container {
+            display: flex;
+            min-height: calc(100vh - 60px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 0;
+            background-color: var(--primary-blue);
+            color: white;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            height: calc(100vh - 60px);
+            z-index: 900;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.active {
+            width: 250px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 1.5rem 0;
+            flex: 1;
+        }
+
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-menu li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-menu li a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .btn-signout {
+            background-color: transparent;
+            color: white;
+            text-align: left;
+            padding: 0.8rem 1.5rem;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-signout:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            padding: 1.5rem;
+            width: 100%;
+        }
+
+        .paybills-header {
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .paybills-header h2 {
+            color: var(--primary-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Pay Bills Container */
+        .paybills-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Pay Bills Tabs */
+        .paybills-tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab {
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            border-bottom: 3px solid var(--primary-blue);
+            color: var(--primary-blue);
+        }
+
+        /* Pay Bills Content */
+        .paybills-content {
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* Biller List */
+        .biller-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .biller-card {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .biller-card:hover {
+            border-color: var(--primary-blue);
+            background-color: rgba(0, 51, 102, 0.05);
+        }
+
+        .biller-icon {
+            width: 40px;
+            height: 40px;
+            background-color: var(--light-gray);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 1rem;
+            color: var(--primary-blue);
+        }
+
+        .biller-info {
+            flex: 1;
+        }
+
+        .biller-name {
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+
+        .biller-account {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .biller-balance {
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+
+        /* Pay Bills Form */
+        .paybills-form {
+            display: none;
+        }
+
+        .paybills-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-blue);
+            outline: none;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .form-col {
+            flex: 1;
+        }
+
+        .btn {
+            padding: 0.7rem 1rem;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #002b57;
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+
+        /* Recent Payments */
+        .recent-payments {
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .payments-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .payment-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .payment-table th, 
+        .payment-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .payment-table th {
+            color: var(--primary-blue);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .payment-table td {
+            font-size: 0.9rem;
+        }
+
+        .payment-status {
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-completed {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: var(--success-green);
+        }
+
+        .status-pending {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+
+        /* Responsive Styles */
+        @media (min-width: 768px) {
+            .sidebar {
+                width: 250px;
+                position: static;
+                height: auto;
+            }
+
+            .main-content {
+                width: calc(100% - 250px);
+            }
+
+            .hamburger {
+                display: none;
+            }
+
+            .paybills-container {
+                flex-direction: row;
+                align-items: flex-start;
+            }
+
+            .paybills-content {
+                flex: 2;
+            }
+
+            .recent-payments {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="logo">
+            <img src="pnc-personal-banking3931 (1).jpg" alt="PNC Bank Logo">
+            <span>PNC Online Banking</span>
+        </div>
+        <div class="header-controls">
+            <div class="user-avatar">FH</div>
+            <button class="hamburger" id="hamburger">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="dashboard.html"><i class="fas fa-wallet"></i> Accounts</a></li>
+                <li><a href="transfer.html"><i class="fas fa-exchange-alt"></i> Transfer</a></li>
+                <li><a href="paybills.html" class="active"><i class="fas fa-money-bill-wave"></i> Pay Bills</a></li>
+                <li><a href="cards.html"><i class="fas fa-credit-card"></i> Cards</a></li>
+                <li><a href="investment.html"><i class="fas fa-chart-line"></i> Investments</a></li>
+                <li><a href="savingsgoal.html"><i class="fas fa-piggy-bank"></i> Savings Goals</a></li>
+                <li><a href="messages.html"><i class="fas fa-envelope"></i> Messages</a></li>
+                <li><a href="statement.html"><i class="fas fa-file-invoice-dollar"></i> Statements</a></li>
+                <li><a href="security.html"><i class="fas fa-user-shield"></i> Security</a></li>
+                <li><a href="help.html"><i class="fas fa-question-circle"></i> Help</a></li>
+            </ul>
+            
+            <div class="sidebar-footer">
+                <button class="btn-signout" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt" style="margin-right: 10px;"></i>
+                    Sign Out
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="paybills-header">
+                <h2>Pay Bills</h2>
+                <p>Pay your bills quickly and securely</p>
+            </div>
+
+            <div class="paybills-container">
+                <div class="paybills-content">
+                    <div class="paybills-tabs">
+                        <div class="tab active" data-tab="pay-biller">Pay a Biller</div>
+                        <div class="tab" data-tab="add-biller">Add a Biller</div>
+                    </div>
+
+                    <!-- Pay Biller Tab Content -->
+                    <div id="pay-biller" class="paybills-form active">
+                        <div class="biller-list">
+                            <!-- Biller 1 -->
+                            <div class="biller-card" data-biller="electric">
+                                <div class="biller-icon">
+                                    <i class="fas fa-bolt"></i>
+                                </div>
+                                <div class="biller-info">
+                                    <div class="biller-name">Duke Energy</div>
+                                    <div class="biller-account">Account: ••••7890</div>
+                                </div>
+                                <div class="biller-balance">$125.75</div>
+                            </div>
+
+                            <!-- Biller 2 -->
+                            <div class="biller-card" data-biller="water">
+                                <div class="biller-icon">
+                                    <i class="fas fa-tint"></i>
+                                </div>
+                                <div class="biller-info">
+                                    <div class="biller-name">City Water Utility</div>
+                                    <div class="biller-account">Account: ••••4567</div>
+                                </div>
+                                <div class="biller-balance">$68.50</div>
+                            </div>
+
+                            <!-- Biller 3 -->
+                            <div class="biller-card" data-biller="internet">
+                                <div class="biller-icon">
+                                    <i class="fas fa-wifi"></i>
+                                </div>
+                                <div class="biller-info">
+                                    <div class="biller-name">Spectrum Internet</div>
+                                    <div class="biller-account">Account: ••••1234</div>
+                                </div>
+                                <div class="biller-balance">$79.99</div>
+                            </div>
+
+                            <!-- Biller 4 -->
+                            <div class="biller-card" data-biller="mortgage">
+                                <div class="biller-icon">
+                                    <i class="fas fa-home"></i>
+                                </div>
+                                <div class="biller-info">
+                                    <div class="biller-name">PNC Mortgage</div>
+                                    <div class="biller-account">Account: ••••5678</div>
+                                </div>
+                                <div class="biller-balance">$1,245.00</div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Form (shown when biller is selected) -->
+                        <div id="payment-form" style="display: none;">
+                            <div class="form-group">
+                                <label>From Account</label>
+                                <select class="form-control">
+                                    <option>Virtual Wallet (••••7890) - $12,345.67</option>
+                                    <option>Savings Account (••••4567) - $5,432.10</option>
+                                    <option>Grant Funds (••••1234) - $100,000.00</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Amount</label>
+                                <div class="form-row">
+                                    <div class="form-col">
+                                        <input type="number" class="form-control" placeholder="0.00" min="0.01" step="0.01">
+                                    </div>
+                                    <div class="form-col">
+                                        <button class="btn btn-primary btn-block">Pay Full Balance</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Payment Date</label>
+                                <select class="form-control">
+                                    <option>Today (June 27, 2023)</option>
+                                    <option>Tomorrow (June 28, 2023)</option>
+                                    <option>July 1, 2023</option>
+                                    <option>July 5, 2023</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Frequency</label>
+                                <select class="form-control">
+                                    <option>One-time payment</option>
+                                    <option>Recurring payment</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary btn-block">Review Payment</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add Biller Tab Content -->
+                    <div id="add-biller" class="paybills-form">
+                        <div class="form-group">
+                            <label>Biller Name</label>
+                            <input type="text" class="form-control" placeholder="e.g. Verizon Wireless">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Biller Category</label>
+                            <select class="form-control">
+                                <option>Select a category</option>
+                                <option>Utilities</option>
+                                <option>Telecommunications</option>
+                                <option>Credit Cards</option>
+                                <option>Loans</option>
+                                <option>Insurance</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Account Number</label>
+                            <input type="text" class="form-control" placeholder="Enter your account number with this biller">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Nickname (Optional)</label>
+                            <input type="text" class="form-control" placeholder="e.g. Home Electric Bill">
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary btn-block">Add Biller</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recent-payments">
+                    <div class="payments-header">
+                        <h3>Recent Payments</h3>
+                        <a href="#" class="btn btn-primary">View All</a>
+                    </div>
+                    <table class="payment-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Payee</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Jun 25</td>
+                                <td>Duke Energy</td>
+                                <td>$120.50</td>
+                                <td><span class="payment-status status-completed">Completed</span></td>
+                            </tr>
+                            <tr>
+                                <td>Jun 20</td>
+                                <td>Spectrum Internet</td>
+                                <td>$79.99</td>
+                                <td><span class="payment-status status-completed">Completed</span></td>
+                            </tr>
+                            <tr>
+                                <td>Jun 15</td>
+                                <td>PNC Mortgage</td>
+                                <td>$1,245.00</td>
+                                <td><span class="payment-status status-completed">Completed</span></td>
+                            </tr>
+                            <tr>
+                                <td>Jun 27</td>
+                                <td>City Water Utility</td>
+                                <td>$68.50</td>
+                                <td><span class="payment-status status-pending">Pending</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Mobile menu toggle
+        const hamburger = document.getElementById('hamburger');
+        const sidebar = document.getElementById('sidebar');
+        
+        hamburger.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            if (window.innerWidth <= 768) {
+                const isClickInsideSidebar = sidebar.contains(event.target);
+                const isClickOnHamburger = hamburger.contains(event.target);
+                
+                if (!isClickInsideSidebar && !isClickOnHamburger) {
+                    sidebar.classList.remove('active');
+                }
+            }
+        });
+
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            if(confirm('Are you sure you want to sign out?')) {
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Tab switching functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs
+                document.querySelectorAll('.tab').forEach(t => {
+                    t.classList.remove('active');
+                });
+                
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Hide all forms
+                document.querySelectorAll('.paybills-form').forEach(form => {
+                    form.style.display = 'none';
+                });
+                
+                // Show the corresponding form
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(tabId).style.display = 'block';
+            });
+        });
+
+        // Biller selection functionality
+        document.querySelectorAll('.biller-card').forEach(card => {
+            card.addEventListener('click', function() {
+                // Highlight selected biller
+                document.querySelectorAll('.biller-card').forEach(c => {
+                    c.style.borderColor = '#ddd';
+                    c.style.backgroundColor = 'transparent';
+                });
+                this.style.borderColor = 'var(--primary-blue)';
+                this.style.backgroundColor = 'rgba(0, 51, 102, 0.05)';
+                
+                // Show payment form
+                document.getElementById('payment-form').style.display = 'block';
+            });
+        });
+
+        // Handle window resize
+        function handleResize() {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+            }
+        }
+
+        window.addEventListener('resize', handleResize);
+    </script>
+</body>
+</html>

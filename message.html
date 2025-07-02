@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PNC Bank | Messages</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: #003366;
+            --accent-orange: #FF8200;
+            --light-gray: #F5F5F5;
+            --dark-gray: #333333;
+            --white: #FFFFFF;
+            --success-green: #28a745;
+            --error-red: #dc3545;
+            --unread-blue: #E6F0FA;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .dashboard-header {
+            background-color: var(--white);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo img {
+            height: 30px;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--primary-blue);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--primary-blue);
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        /* Main Content */
+        .dashboard-container {
+            display: flex;
+            min-height: calc(100vh - 60px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 0;
+            background-color: var(--primary-blue);
+            color: white;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            height: calc(100vh - 60px);
+            z-index: 900;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.active {
+            width: 250px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 1.5rem 0;
+            flex: 1;
+        }
+
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-menu li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-menu li a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .btn-signout {
+            background-color: transparent;
+            color: white;
+            text-align: left;
+            padding: 0.8rem 1.5rem;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-signout:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            padding: 1.5rem;
+            width: 100%;
+        }
+
+        .messages-header {
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .messages-header h2 {
+            color: var(--primary-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Messages Container */
+        .messages-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Messages Navigation */
+        .messages-nav {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-tab {
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-tab.active {
+            border-bottom: 3px solid var(--primary-blue);
+            color: var(--primary-blue);
+        }
+
+        .nav-tab .badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: var(--error-red);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Messages Content */
+        .messages-content {
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Message List */
+        .message-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .message-item {
+            display: flex;
+            padding: 1rem;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .message-item.unread {
+            background-color: var(--unread-blue);
+            border-left: 3px solid var(--primary-blue);
+        }
+
+        .message-item:hover {
+            background-color: rgba(0, 51, 102, 0.05);
+        }
+
+        .message-checkbox {
+            margin-right: 1rem;
+            align-self: center;
+        }
+
+        .message-sender {
+            min-width: 150px;
+            font-weight: 600;
+            margin-right: 1rem;
+        }
+
+        .message-preview {
+            flex: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .message-preview.unread {
+            font-weight: 600;
+        }
+
+        .message-date {
+            color: #666;
+            font-size: 0.9rem;
+            min-width: 100px;
+            text-align: right;
+        }
+
+        /* Message Actions */
+        .message-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.7rem 1rem;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #002b57;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary-blue);
+            color: var(--primary-blue);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(0, 51, 102, 0.1);
+        }
+
+        .btn-danger {
+            background-color: var(--error-red);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        /* Message Detail View */
+        .message-detail {
+            display: none;
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .message-detail.active {
+            display: block;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .message-subject {
+            font-size: 1.3rem;
+            color: var(--primary-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .message-meta {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .message-body {
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+
+        .message-attachments {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .attachment-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .attachment-icon {
+            margin-right: 0.5rem;
+            color: var(--primary-blue);
+        }
+
+        /* Compose Message */
+        .compose-message {
+            display: none;
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .compose-message.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-blue);
+            outline: none;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .form-col {
+            flex: 1;
+        }
+
+        textarea.form-control {
+            min-height: 200px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: #ccc;
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive Styles */
+        @media (min-width: 768px) {
+            .sidebar {
+                width: 250px;
+                position: static;
+                height: auto;
+            }
+
+            .main-content {
+                width: calc(100% - 250px);
+            }
+
+            .hamburger {
+                display: none;
+            }
+
+            .messages-container {
+                flex-direction: row;
+                align-items: flex-start;
+            }
+
+            .message-list-container {
+                flex: 1;
+                min-width: 350px;
+            }
+
+            .message-detail-container {
+                flex: 2;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .message-sender {
+                min-width: 100px;
+            }
+
+            .message-date {
+                min-width: 70px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="logo">
+            <img src="pnc-personal-banking3931 (1).jpg" alt="PNC Bank Logo">
+            <span>PNC Online Banking</span>
+        </div>
+        <div class="header-controls">
+            <div class="user-avatar">FH</div>
+            <button class="hamburger" id="hamburger">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="dashboard.html"><i class="fas fa-wallet"></i> Accounts</a></li>
+                <li><a href="transfer.html"><i class="fas fa-exchange-alt"></i> Transfer</a></li>
+                <li><a href="paybills.html"><i class="fas fa-money-bill-wave"></i> Pay Bills</a></li>
+                <li><a href="cards.html"><i class="fas fa-credit-card"></i> Cards</a></li>
+                <li><a href="investment.html"><i class="fas fa-chart-line"></i> Investments</a></li>
+                <li><a href="savingsgoal.html"><i class="fas fa-piggy-bank"></i> Savings Goals</a></li>
+                <li><a href="messages.html" class="active"><i class="fas fa-envelope"></i> Messages</a></li>
+                <li><a href="statement.html"><i class="fas fa-file-invoice-dollar"></i> Statements</a></li>
+                <li><a href="security.html"><i class="fas fa-user-shield"></i> Security</a></li>
+                <li><a href="help.html"><i class="fas fa-question-circle"></i> Help</a></li>
+            </ul>
+            
+            <div class="sidebar-footer">
+                <button class="btn-signout" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt" style="margin-right: 10px;"></i>
+                    Sign Out
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="messages-header">
+                <div>
+                    <h2>Messages</h2>
+                    <p>View and manage your secure messages</p>
+                </div>
+                <button class="btn btn-primary" id="composeBtn">
+                    <i class="fas fa-plus"></i> Compose
+                </button>
+            </div>
+
+            <div class="messages-container">
+                <div class="message-list-container">
+                    <div class="messages-content">
+                        <div class="messages-nav">
+                            <div class="nav-tab active" data-tab="inbox">Inbox</div>
+                            <div class="nav-tab" data-tab="sent">Sent</div>
+                            <div class="nav-tab" data-tab="archived">Archived <span class="badge">3</span></div>
+                        </div>
+
+                        <div class="message-list" id="inbox-messages">
+                            <!-- Message 1 -->
+                            <div class="message-item unread" data-message="1">
+                                <div class="message-checkbox">
+                                    <input type="checkbox">
+                                </div>
+                                <div class="message-sender">PNC Alerts</div>
+                                <div class="message-preview unread">Security Alert: New login detected from Chrome on Windows</div>
+                                <div class="message-date">Today, 10:45 AM</div>
+                            </div>
+
+                            <!-- Message 2 -->
+                            <div class="message-item unread" data-message="2">
+                                <div class="message-checkbox">
+                                    <input type="checkbox">
+                                </div>
+                                <div class="message-sender">Customer Service</div>
+                                <div class="message-preview unread">Your recent inquiry about wire transfers</div>
+                                <div class="message-date">Yesterday, 2:30 PM</div>
+                            </div>
+
+                            <!-- Message 3 -->
+                            <div class="message-item" data-message="3">
+                                <div class="message-checkbox">
+                                    <input type="checkbox">
+                                </div>
+                                <div class="message-sender">Account Services</div>
+                                <div class="message-preview">Your monthly statement is now available</div>
+                                <div class="message-date">Jun 27, 2023</div>
+                            </div>
+
+                            <!-- Message 4 -->
+                            <div class="message-item" data-message="4">
+                                <div class="message-checkbox">
+                                    <input type="checkbox">
+                                </div>
+                                <div class="message-sender">Fraud Prevention</div>
+                                <div class="message-preview">Important information about protecting your account</div>
+                                <div class="message-date">Jun 25, 2023</div>
+                            </div>
+
+                            <!-- Message 5 -->
+                            <div class="message-item" data-message="5">
+                                <div class="message-checkbox">
+                                    <input type="checkbox">
+                                </div>
+                                <div class="message-sender">Credit Card Services</div>
+                                <div class="message-preview">Your payment of $125.00 has been processed</div>
+                                <div class="message-date">Jun 22, 2023</div>
+                            </div>
+                        </div>
+
+                        <div class="message-list" id="sent-messages" style="display: none;">
+                            <!-- Empty state for sent messages -->
+                            <div class="empty-state">
+                                <i class="fas fa-paper-plane"></i>
+                                <h3>No Sent Messages</h3>
+                                <p>You haven't sent any messages yet.</p>
+                            </div>
+                        </div>
+
+                        <div class="message-list" id="archived-messages" style="display: none;">
+                            <!-- Message 6 -->
+                            <div class="message-item" data-message="6">
+                                <div class="message-checkbox">
+                                    <input type="checkbox">
+                                </div>
+                                <div class="message-sender">Loan Services</div>
+                                <div class="message-preview">Your mortgage application update</div>
+                                <div class="message-date">May 15, 2023</div>
+                            </div>
+
+                            <!-- Message 7 -->
+                            <div class="message-item" data-message="7">
+                                <div class="message-checkbox">
+                                    <input type="checkbox">
+                                </div>
+                                <div class="message-sender">Investment Services</div>
+                                <div class="message-preview">Quarterly portfolio performance report</div>
+                                <div class="message-date">Apr 5, 2023</div>
+                            </div>
+
+                            <!-- Message 8 -->
+                            <div class="message-item" data-message="8">
+                                <div class="message-checkbox">
+                                    <input type="checkbox">
+                                </div>
+                                <div class="message-sender">PNC Alerts</div>
+                                <div class="message-preview">Scheduled maintenance notification</div>
+                                <div class="message-date">Mar 20, 2023</div>
+                            </div>
+                        </div>
+
+                        <div class="message-actions">
+                            <button class="btn btn-outline">
+                                <i class="fas fa-archive"></i> Archive
+                            </button>
+                            <button class="btn btn-outline">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                            <button class="btn btn-outline">
+                                <i class="fas fa-envelope"></i> Mark as Read
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="message-detail-container">
+                    <!-- Message Detail View -->
+                    <div class="message-detail" id="message-detail-1">
+                        <div class="message-header">
+                            <div>
+                                <div class="message-subject">Security Alert: New login detected from Chrome on Windows</div>
+                                <div class="message-meta">
+                                    From: <strong>PNC Alerts</strong> • Today, 10:45 AM
+                                </div>
+                            </div>
+                            <div>
+                                <button class="btn btn-outline">
+                                    <i class="fas fa-reply"></i> Reply
+                                </button>
+                            </div>
+                        </div>
+                        <div class="message-body">
+                            <p>Dear Account Holder,</p>
+                            <p>We detected a new login to your PNC Online Banking account from Chrome on Windows at 10:45 AM on June 28, 2023.</p>
+                            <p>If this was you, no action is required. If you don't recognize this activity, please contact us immediately at 1-888-PNC-BANK.</p>
+                            <p>For your security, we recommend:</p>
+                            <ul>
+                                <li>Regularly updating your password</li>
+                                <li>Enabling two-factor authentication</li>
+                                <li>Monitoring your account activity</li>
+                            </ul>
+                            <p>Thank you for banking with PNC.</p>
+                            <p>Sincerely,<br>PNC Security Team</p>
+                        </div>
+                        <div class="message-actions">
+                            <button class="btn btn-outline">
+                                <i class="fas fa-reply"></i> Reply
+                            </button>
+                            <button class="btn btn-outline">
+                                <i class="fas fa-archive"></i> Archive
+                            </button>
+                            <button class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Compose Message -->
+                    <div class="compose-message" id="compose-message">
+                        <form id="newMessageForm">
+                            <div class="form-group">
+                                <label>To</label>
+                                <select class="form-control" required>
+                                    <option value="">Select recipient</option>
+                                    <option>Customer Service</option>
+                                    <option>Account Services</option>
+                                    <option>Fraud Prevention</option>
+                                    <option>Credit Card Services</option>
+                                    <option>Loan Services</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Subject</label>
+                                <input type="text" class="form-control" placeholder="Enter subject" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Message</label>
+                                <textarea class="form-control" placeholder="Type your message here" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Attachments (Optional)</label>
+                                <input type="file" class="form-control">
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-outline" id="cancelCompose">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Send Message</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Empty Detail View -->
+                    <div class="message-detail active" id="empty-detail">
+                        <div class="empty-state">
+                            <i class="fas fa-envelope-open-text"></i>
+                            <h3>No Message Selected</h3>
+                            <p>Select a message from the list to view its contents.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Mobile menu toggle
+        const hamburger = document.getElementById('hamburger');
+        const sidebar = document.getElementById('sidebar');
+        
+        hamburger.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            if (window.innerWidth <= 768) {
+                const isClickInsideSidebar = sidebar.contains(event.target);
+                const isClickOnHamburger = hamburger.contains(event.target);
+                
+                if (!isClickInsideSidebar && !isClickOnHamburger) {
+                    sidebar.classList.remove('active');
+                }
+            }
+        });
+
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            if(confirm('Are you sure you want to sign out?')) {
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Tab switching functionality
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs
+                document.querySelectorAll('.nav-tab').forEach(t => {
+                    t.classList.remove('active');
+                });
+                
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Hide all message lists
+                document.querySelectorAll('.message-list').forEach(list => {
+                    list.style.display = 'none';
+                });
+                
+                // Show the corresponding message list
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(tabId + '-messages').style.display = 'flex';
+                
+                // Show empty detail view
+                showEmptyDetail();
+            });
+        });
+
+        // Message selection functionality
+        document.querySelectorAll('.message-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // Highlight selected message
+                document.querySelectorAll('.message-item').forEach(i => {
+                    i.style.backgroundColor = 'transparent';
+                });
+                this.style.backgroundColor = 'rgba(0, 51, 102, 0.05)';
+                
+                // Mark as read
+                this.classList.remove('unread');
+                const preview = this.querySelector('.message-preview');
+                if (preview) preview.classList.remove('unread');
+                
+                // Show the corresponding message detail
+                const messageId = this.getAttribute('data-message');
+                showMessageDetail(messageId);
+            });
+        });
+
+        function showMessageDetail(messageId) {
+            // Hide all message details and compose
+            document.querySelectorAll('.message-detail, .compose-message').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            // Show the selected message detail
+            const detail = document.getElementById('message-detail-' + messageId);
+            if (detail) detail.style.display = 'block';
+        }
+
+        function showEmptyDetail() {
+            // Hide all message details and compose
+            document.querySelectorAll('.message-detail, .compose-message').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            // Show empty detail view
+            document.getElementById('empty-detail').style.display = 'block';
+        }
+
+        // Compose message functionality
+        const composeBtn = document.getElementById('composeBtn');
+        const cancelCompose = document.getElementById('cancelCompose');
+        const newMessageForm = document.getElementById('newMessageForm');
+
+        composeBtn.addEventListener('click', function() {
+            // Hide all message details
+            document.querySelectorAll('.message-detail').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            // Show compose form
+            document.getElementById('compose-message').style.display = 'block';
+            
+            // Unhighlight any selected messages
+            document.querySelectorAll('.message-item').forEach(i => {
+                i.style.backgroundColor = 'transparent';
+            });
+        });
+
+        cancelCompose.addEventListener('click', function() {
+            showEmptyDetail();
+            newMessageForm.reset();
+        });
+
+        // Form submission
+        newMessageForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Here you would typically handle the form submission
+            alert('Your message has been sent successfully!');
+            showEmptyDetail();
+            newMessageForm.reset();
+        });
+
+        // Handle window resize
+        function handleResize() {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+            }
+        }
+
+        window.addEventListener('resize', handleResize);
+    </script>
+</body>
+</html>

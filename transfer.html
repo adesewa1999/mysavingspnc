@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PNC Bank | Transfer Funds</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: #003366;
+            --accent-orange: #FF8200;
+            --light-gray: #F5F5F5;
+            --dark-gray: #333333;
+            --white: #FFFFFF;
+            --success-green: #28a745;
+            --error-red: #dc3545;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            line-height: 1.6;
+        }
+
+        .dashboard-header {
+            background-color: var(--white);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo img {
+            height: 30px;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--primary-blue);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--primary-blue);
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: calc(100vh - 60px);
+        }
+
+        .sidebar {
+            width: 0;
+            background-color: var(--primary-blue);
+            color: white;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            height: calc(100vh - 60px);
+            z-index: 900;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.active {
+            width: 250px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 1.5rem 0;
+            flex: 1;
+        }
+
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-menu li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-menu li a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .btn-signout {
+            background-color: transparent;
+            color: white;
+            text-align: left;
+            padding: 0.8rem 1.5rem;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-signout:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 1.5rem;
+            width: 100%;
+        }
+
+        .transfer-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .transfer-header {
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .transfer-header h2 {
+            color: var(--primary-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .transfer-form {
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-blue);
+            outline: none;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .form-col {
+            flex: 1;
+        }
+
+        .account-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .account-option {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .account-option:hover {
+            border-color: var(--primary-blue);
+        }
+
+        .account-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .account-option input[type="radio"]:checked + .account-info {
+            color: var(--primary-blue);
+        }
+
+        .account-info {
+            pointer-events: none;
+        }
+
+        .account-name {
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .account-number {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .account-balance {
+            font-size: 0.9rem;
+            color: var(--primary-blue);
+        }
+
+        .btn {
+            padding: 0.7rem 1rem;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #002b57;
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .modal-header h3 {
+            color: var(--primary-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .verification-code {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 1.5rem 0;
+        }
+
+        .verification-code input {
+            width: 50px;
+            height: 60px;
+            text-align: center;
+            font-size: 1.5rem;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .verification-code input:focus {
+            border-color: var(--primary-blue);
+            outline: none;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255,255,255,0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1100;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .loading-screen.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .success-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1200;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .success-screen.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background-color: var(--success-green);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .success-icon i {
+            color: white;
+            font-size: 2.5rem;
+        }
+
+        .success-screen h2 {
+            color: var(--success-green);
+            margin-bottom: 1rem;
+        }
+
+        .success-screen p {
+            margin-bottom: 1.5rem;
+            max-width: 500px;
+        }
+
+        .success-details {
+            background-color: var(--light-gray);
+            border-radius: 8px;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .sidebar {
+                width: 250px;
+                position: static;
+                height: auto;
+            }
+
+            .main-content {
+                width: calc(100% - 250px);
+            }
+
+            .hamburger {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="dashboard-header">
+        <div class="logo">
+            <img src="pnc-personal-banking3931 (1).jpg" alt="PNC Bank Logo">
+            <span>PNC Online Banking</span>
+        </div>
+        <div class="header-controls">
+            <div class="user-avatar">FH</div>
+            <button class="hamburger" id="hamburger">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <aside class="sidebar" id="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="dashboard.html"><i class="fas fa-wallet"></i> Accounts</a></li>
+                <li><a href="transfer.html" class="active"><i class="fas fa-exchange-alt"></i> Transfer</a></li>
+                <li><a href="paybills.html"><i class="fas fa-money-bill-wave"></i> Pay Bills</a></li>
+                <li><a href="cards.html"><i class="fas fa-credit-card"></i> Cards</a></li>
+                <li><a href="investment.html"><i class="fas fa-chart-line"></i> Investments</a></li>
+                <li><a href="savingsgoal.html"><i class="fas fa-piggy-bank"></i> Savings Goals</a></li>
+                <li><a href="messages.html"><i class="fas fa-envelope"></i> Messages</a></li>
+                <li><a href="statement.html"><i class="fas fa-file-invoice-dollar"></i> Statements</a></li>
+                <li><a href="security.html"><i class="fas fa-user-shield"></i> Security</a></li>
+                <li><a href="help.html"><i class="fas fa-question-circle"></i> Help</a></li>
+            </ul>
+            
+            <div class="sidebar-footer">
+                <button class="btn-signout" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt" style="margin-right: 10px;"></i>
+                    Sign Out
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="transfer-container">
+                <div class="transfer-header">
+                    <h2>Transfer Funds</h2>
+                    <p>Move money between your PNC accounts or to external accounts</p>
+                </div>
+
+                <form class="transfer-form" id="transferForm">
+                    <div class="form-group">
+                        <label>Transfer Type</label>
+                        <select class="form-control" id="transferType">
+                            <option value="internal">Between My PNC Accounts</option>
+                            <option value="external">To Another Bank Account</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>From Account</label>
+                        <div class="account-selector">
+                            <label class="account-option" for="from-virtual">
+                                <input type="radio" id="from-virtual" name="fromAccount" value="virtual" checked>
+                                <div class="account-info">
+                                    <div class="account-name">Virtual Wallet</div>
+                                    <div class="account-number">••••7890</div>
+                                    <div class="account-balance" id="from-virtual-balance">Available: $12,345.67</div>
+                                </div>
+                            </label>
+                            <label class="account-option" for="from-savings">
+                                <input type="radio" id="from-savings" name="fromAccount" value="savings">
+                                <div class="account-info">
+                                    <div class="account-name">Savings Account</div>
+                                    <div class="account-number">••••4567</div>
+                                    <div class="account-balance" id="from-savings-balance">Available: $5,432.10</div>
+                                </div>
+                            </label>
+                            <label class="account-option" for="from-grant">
+                                <input type="radio" id="from-grant" name="fromAccount" value="grant">
+                                <div class="account-info">
+                                    <div class="account-name">Grant Funds</div>
+                                    <div class="account-number">••••1234</div>
+                                    <div class="account-balance" id="from-grant-balance">Available: $100,000.00</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>To Account</label>
+                        <div class="account-selector" id="internalAccounts">
+                            <label class="account-option" for="to-virtual">
+                                <input type="radio" id="to-virtual" name="toAccount" value="virtual">
+                                <div class="account-info">
+                                    <div class="account-name">Virtual Wallet</div>
+                                    <div class="account-number">••••7890</div>
+                                </div>
+                            </label>
+                            <label class="account-option" for="to-savings">
+                                <input type="radio" id="to-savings" name="toAccount" value="savings" checked>
+                                <div class="account-info">
+                                    <div class="account-name">Savings Account</div>
+                                    <div class="account-number">••••4567</div>
+                                </div>
+                            </label>
+                            <label class="account-option" for="to-grant">
+                                <input type="radio" id="to-grant" name="toAccount" value="grant">
+                                <div class="account-info">
+                                    <div class="account-name">Grant Funds</div>
+                                    <div class="account-number">••••1234</div>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div id="externalAccountFields" style="display: none;">
+                            <div class="form-group">
+                                <label>Bank Name</label>
+                                <select class="form-control" id="bankName">
+                                    <option value="">Select Bank</option>
+                                    <option value="Bank of the West">Westpac Bank of Australia</option>
+                                    <option value="Bank of America">Bank of America</option>
+                                    <option value="Wells Fargo">Wells Fargo</option>
+                                    <option value="Chase">Chase</option>
+                                    <option value="Citibank">Citibank</option>
+                                    <option value="U.S. Bank">U.S. Bank</option>
+                                    <option value="Truist Bank">Truist Bank</option>
+                                    <option value="Capital One">Capital One</option>
+                                    <option value="TD Bank">TD Bank</option>
+                                    <option value="HSBC Bank">HSBC Bank</option>
+                                    <option value="American Express">American Express</option>
+                                    <option value="Ally Bank">Ally Bank</option>
+                                    <option value="Discover Bank">Discover Bank</option>
+                                    <option value="Synchrony Bank">Synchrony Bank</option>
+                                    <option value="Charles Schwab Bank">Charles Schwab Bank</option>
+                                    <option value="Goldman Sachs Bank">Goldman Sachs Bank</option>
+                                    <option value="Morgan Stanley Private Bank">Morgan Stanley Private Bank</option>
+                                    <option value="Silicon Valley Bank">Silicon Valley Bank</option>
+                                    <option value="First Republic Bank">First Republic Bank</option>
+                                    <option value="Other">Other Bank</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Account Number</label>
+                                <input type="text" class="form-control" id="externalAccountNumber" placeholder="Enter account number">
+                            </div>
+                            <div class="form-group">
+                                <label>Routing Number</label>
+                                <input type="text" class="form-control" id="routingNumber" placeholder="Enter routing number">
+                                <small style="color: #666; display: block; margin-top: 0.5rem;">The routing number is 9 digits long</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Amount</label>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <input type="number" class="form-control" id="amount" placeholder="0.00" min="0.01" step="0.01">
+                            </div>
+                            <div class="form-col">
+                                <select class="form-control" id="frequency">
+                                    <option value="once">One-time transfer</option>
+                                    <option value="recurring">Recurring transfer</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="recurringOptions" style="display: none;">
+                        <label>Recurrence</label>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <select class="form-control" id="recurrenceFrequency">
+                                    <option value="weekly">Weekly</option>
+                                    <option value="biweekly">Bi-weekly</option>
+                                    <option value="monthly">Monthly</option>
+                                </select>
+                            </div>
+                            <div class="form-col">
+                                <input type="date" class="form-control" id="startDate">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Description (Optional)</label>
+                        <input type="text" class="form-control" id="description" placeholder="Enter description">
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary btn-block">Review Transfer</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal-overlay" id="verificationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Verify Your Transfer</h3>
+                <p>Please enter your transfer PIN to proceed</p>
+            </div>
+            <form id="verificationForm">
+                <div class="form-group">
+                    <label>Enter your 4-digit PIN</label>
+                    <div class="verification-code">
+                        <input type="text" maxlength="1" pattern="[0-9]" required>
+                        <input type="text" maxlength="1" pattern="[0-9]" required>
+                        <input type="text" maxlength="1" pattern="[0-9]" required>
+                        <input type="text" maxlength="1" pattern="[0-9]" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" id="cancelTransfer">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Confirm Transfer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-spinner"></div>
+        <h3>Processing Your Transfer</h3>
+        <p>Please wait while we complete your transaction</p>
+    </div>
+
+    <div class="success-screen" id="successScreen">
+        <div class="success-icon">
+            <i class="fas fa-check"></i>
+        </div>
+        <h2>Transfer Successful!</h2>
+        <p>Your funds have been transferred successfully. A confirmation has been sent to your email.</p>
+        
+        <div class="success-details">
+            <p><strong>From:</strong> <span id="successFrom">Virtual Wallet (••••7890)</span></p>
+            <p><strong>To:</strong> <span id="successTo">Savings Account (••••4567)</span></p>
+            <p><strong>Amount:</strong> <span id="successAmount">$100.00</span></p>
+            <p><strong>Date:</strong> <span id="successDate">June 27, 2023</span></p>
+            <p><strong>Reference:</strong> <span id="successRef">TX-987654321</span></p>
+        </div>
+        
+        <button class="btn btn-primary" id="successDone">Done</button>
+    </div>
+
+    <script>
+        // Account types
+        const ACCOUNT_TYPES = {
+            VIRTUAL: 'virtual',
+            SAVINGS: 'savings',
+            GRANT: 'grant'
+        };
+
+        // Initialize accounts from localStorage
+        function getAccounts() {
+            const defaultAccounts = {
+                [ACCOUNT_TYPES.VIRTUAL]: {
+                    id: ACCOUNT_TYPES.VIRTUAL,
+                    name: "Virtual Wallet",
+                    number: "••••7890",
+                    balance: 12345.67
+                },
+                [ACCOUNT_TYPES.SAVINGS]: {
+                    id: ACCOUNT_TYPES.SAVINGS,
+                    name: "Savings Account",
+                    number: "••••4567",
+                    balance: 5432.10
+                },
+                [ACCOUNT_TYPES.GRANT]: {
+                    id: ACCOUNT_TYPES.GRANT,
+                    name: "Grant Funds",
+                    number: "••••1234",
+                    balance: 100000.00
+                }
+            };
+
+            try {
+                const storedAccounts = JSON.parse(localStorage.getItem('accounts'));
+                return storedAccounts || defaultAccounts;
+            } catch {
+                return defaultAccounts;
+            }
+        }
+
+        // Format currency
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            }).format(amount);
+        }
+
+        // Initialize the transfer form
+        function initTransferForm() {
+            const accounts = getAccounts();
+            
+            // Update balance displays
+            document.getElementById('from-virtual-balance').textContent = 
+                `Available: ${formatCurrency(accounts[ACCOUNT_TYPES.VIRTUAL].balance)}`;
+            document.getElementById('from-savings-balance').textContent = 
+                `Available: ${formatCurrency(accounts[ACCOUNT_TYPES.SAVINGS].balance)}`;
+            document.getElementById('from-grant-balance').textContent = 
+                `Available: ${formatCurrency(accounts[ACCOUNT_TYPES.GRANT].balance)}`;
+
+            // Transfer type toggle
+            document.getElementById('transferType').addEventListener('change', function() {
+                const transferType = this.value;
+                const internalAccounts = document.getElementById('internalAccounts');
+                const externalAccountFields = document.getElementById('externalAccountFields');
+                
+                if (transferType === 'internal') {
+                    internalAccounts.style.display = 'flex';
+                    externalAccountFields.style.display = 'none';
+                } else {
+                    internalAccounts.style.display = 'none';
+                    externalAccountFields.style.display = 'block';
+                }
+            });
+
+            // Recurring transfer options
+            document.getElementById('frequency').addEventListener('change', function() {
+                const frequency = this.value;
+                const recurringOptions = document.getElementById('recurringOptions');
+                
+                if (frequency === 'recurring') {
+                    recurringOptions.style.display = 'block';
+                    // Set default start date to tomorrow
+                    const tomorrow = new Date();
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    document.getElementById('startDate').valueAsDate = tomorrow;
+                } else {
+                    recurringOptions.style.display = 'none';
+                }
+            });
+
+            // Verification code input handling
+            const codeInputs = document.querySelectorAll('.verification-code input');
+            codeInputs.forEach((input, index) => {
+                // Allow only numbers
+                input.addEventListener('input', function() {
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                    
+                    // Auto-focus next input
+                    if (this.value.length === 1 && index < codeInputs.length - 1) {
+                        codeInputs[index + 1].focus();
+                    }
+                });
+                
+                // Handle backspace
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Backspace' && this.value.length === 0 && index > 0) {
+                        codeInputs[index - 1].focus();
+                    }
+                });
+            });
+
+            // Form submission
+            document.getElementById('transferForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const amount = parseFloat(document.getElementById('amount').value);
+                if (!amount || amount <= 0) {
+                    alert('Please enter a valid amount');
+                    return;
+                }
+                
+                const fromAccount = document.querySelector('input[name="fromAccount"]:checked').value;
+                const accounts = getAccounts();
+                
+                // Check if sufficient balance
+                if (amount > accounts[fromAccount].balance) {
+                    alert('Insufficient funds for this transfer');
+                    return;
+                }
+                
+                let toAccount, transferType;
+                
+                if (document.getElementById('transferType').value === 'internal') {
+                    toAccount = document.querySelector('input[name="toAccount"]:checked').value;
+                    transferType = 'internal';
+                    
+                    // Check if transferring to same account
+                    if (fromAccount === toAccount) {
+                        alert('Cannot transfer to the same account');
+                        return;
+                    }
+                } else {
+                    const bankName = document.getElementById('bankName').value;
+                    const accountNumber = document.getElementById('externalAccountNumber').value;
+                    const routingNumber = document.getElementById('routingNumber').value;
+                    
+                    if (!bankName) {
+                        alert('Please select a bank');
+                        return;
+                    }
+                    
+                    if (!accountNumber || accountNumber.length < 5) {
+                        alert('Please enter a valid account number');
+                        return;
+                    }
+                    
+                    if (!routingNumber || routingNumber.length !== 9) {
+                        alert('Please enter a valid 9-digit routing number');
+                        return;
+                    }
+                    
+                    transferType = 'external';
+                    toAccount = 'external';
+                }
+                
+                // Prepare transfer data
+                const transferData = {
+                    fromAccount: fromAccount,
+                    fromName: accounts[fromAccount].name,
+                    fromNumber: accounts[fromAccount].number,
+                    fromBalance: accounts[fromAccount].balance - amount,
+                    toAccount: transferType === 'internal' ? toAccount : null,
+                    toName: transferType === 'internal' ? accounts[toAccount].name : document.getElementById('bankName').value,
+                    toNumber: transferType === 'internal' ? accounts[toAccount].number : '••••' + document.getElementById('externalAccountNumber').value.slice(-4),
+                    toBalance: transferType === 'internal' ? accounts[toAccount].balance + amount : null,
+                    amount: amount,
+                    description: document.getElementById('description')?.value || "Transfer",
+                    date: new Date().toISOString(),
+                    type: transferType
+                };
+
+                // Store transfer data
+                localStorage.setItem('pendingTransfer', JSON.stringify(transferData));
+                
+                // Show verification modal
+                document.getElementById('verificationModal').classList.add('active');
+                
+                // Set focus on first code input
+                codeInputs[0].focus();
+            });
+
+            // Verification form submission
+            document.getElementById('verificationForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Get the entered code
+                let enteredCode = '';
+                codeInputs.forEach(input => {
+                    enteredCode += input.value;
+                });
+                
+                // Static verification code (1999)
+                if (enteredCode !== '1999') {
+                    alert('Invalid verification code. Please try again.');
+                    return;
+                }
+                
+                // Close verification modal
+                document.getElementById('verificationModal').classList.remove('active');
+                
+                // Show loading screen
+                document.getElementById('loadingScreen').classList.add('active');
+                
+                // Get transfer data
+                const transferData = JSON.parse(localStorage.getItem('pendingTransfer'));
+                
+                // Simulate processing delay (3 seconds)
+                setTimeout(function() {
+                    // Hide loading screen
+                    document.getElementById('loadingScreen').classList.remove('active');
+                    
+                    // Set success details
+                    document.getElementById('successFrom').textContent = 
+                        `${transferData.fromName} (${transferData.fromNumber})`;
+                    document.getElementById('successTo').textContent = 
+                        `${transferData.toName} (${transferData.toNumber})`;
+                    document.getElementById('successAmount').textContent = 
+                        formatCurrency(transferData.amount);
+                    document.getElementById('successDate').textContent = 
+                        new Date(transferData.date).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        });
+                    document.getElementById('successRef').textContent = 
+                        'TX-' + Math.floor(100000000 + Math.random() * 900000000);
+                    
+                    // Show success screen
+                    document.getElementById('successScreen').classList.add('active');
+                }, 3000);
+            });
+
+            // Cancel transfer button
+            document.getElementById('cancelTransfer').addEventListener('click', function() {
+                document.getElementById('verificationModal').classList.remove('active');
+                // Clear verification code inputs
+                codeInputs.forEach(input => {
+                    input.value = '';
+                });
+            });
+
+            // Success screen done button
+            document.getElementById('successDone').addEventListener('click', function() {
+                document.getElementById('successScreen').classList.remove('active');
+                // Redirect to dashboard
+                window.location.href = 'dashboard.html';
+            });
+        }
+
+        // Mobile menu toggle
+        function setupMobileMenu() {
+            const hamburger = document.getElementById('hamburger');
+            const sidebar = document.getElementById('sidebar');
+            
+            hamburger.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+            });
+
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', function(event) {
+                if (window.innerWidth <= 768) {
+                    const isClickInsideSidebar = sidebar.contains(event.target);
+                    const isClickOnHamburger = hamburger.contains(event.target);
+                    
+                    if (!isClickInsideSidebar && !isClickOnHamburger) {
+                        sidebar.classList.remove('active');
+                    }
+                }
+            });
+        }
+
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            if(confirm('Are you sure you want to sign out?')) {
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Initialize the application
+        function initApp() {
+            // Initialize transfer form
+            initTransferForm();
+
+            // Setup mobile menu
+            setupMobileMenu();
+
+            // Handle window resize
+            function handleResize() {
+                if (window.innerWidth > 768) {
+                    document.getElementById('sidebar').classList.remove('active');
+                }
+            }
+
+            window.addEventListener('resize', handleResize);
+        }
+
+        // Start the application when the page loads
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>

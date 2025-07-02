@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PNC Bank | Help & Support</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: #003366;
+            --accent-orange: #FF8200;
+            --light-gray: #F5F5F5;
+            --dark-gray: #333333;
+            --white: #FFFFFF;
+            --success-green: #28a745;
+            --warning-yellow: #ffc107;
+            --error-red: #dc3545;
+            --info-blue: #17a2b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .dashboard-header {
+            background-color: var(--white);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo img {
+            height: 30px;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--primary-blue);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--primary-blue);
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        /* Main Content */
+        .dashboard-container {
+            display: flex;
+            min-height: calc(100vh - 60px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 0;
+            background-color: var(--primary-blue);
+            color: white;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            height: calc(100vh - 60px);
+            z-index: 900;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.active {
+            width: 250px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 1.5rem 0;
+            flex: 1;
+        }
+
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-menu li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-menu li a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .btn-signout {
+            background-color: transparent;
+            color: white;
+            text-align: left;
+            padding: 0.8rem 1.5rem;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-signout:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            padding: 1.5rem;
+            width: 100%;
+        }
+
+        .help-header {
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .help-header h2 {
+            color: var(--primary-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Help Dashboard */
+        .help-dashboard {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Quick Help */
+        .quick-help {
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .quick-help-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .help-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .help-card:hover {
+            border-color: var(--primary-blue);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .help-icon {
+            font-size: 2rem;
+            color: var(--primary-blue);
+            margin-bottom: 1rem;
+        }
+
+        .help-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .help-description {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .faq-item {
+            border-bottom: 1px solid #eee;
+            padding: 1rem 0;
+        }
+
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+
+        .faq-question {
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .faq-answer {
+            color: #666;
+            padding-top: 1rem;
+            display: none;
+        }
+
+        .faq-answer.show {
+            display: block;
+        }
+
+        .faq-toggle {
+            color: var(--primary-blue);
+            font-size: 1.2rem;
+        }
+
+        /* Contact Options */
+        .contact-options {
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .contact-methods {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .contact-card {
+            flex: 1;
+            min-width: 200px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .contact-icon {
+            font-size: 2rem;
+            color: var(--primary-blue);
+            margin-bottom: 1rem;
+        }
+
+        .contact-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .contact-detail {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.7rem 1rem;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #002b57;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary-blue);
+            color: var(--primary-blue);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(0, 51, 102, 0.1);
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+
+        /* Search Bar */
+        .search-bar {
+            display: flex;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px 0 0 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary-blue);
+            outline: none;
+        }
+
+        .search-btn {
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: 0 5px 5px 0;
+            padding: 0 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Responsive Styles */
+        @media (min-width: 768px) {
+            .sidebar {
+                width: 250px;
+                position: static;
+                height: auto;
+            }
+
+            .main-content {
+                width: calc(100% - 250px);
+            }
+
+            .hamburger {
+                display: none;
+            }
+
+            .help-dashboard {
+                display: grid;
+                grid-template-columns: 2fr 1fr;
+                grid-template-areas:
+                    "quick contact"
+                    "faq faq";
+                gap: 1.5rem;
+            }
+
+            .quick-help {
+                grid-area: quick;
+            }
+
+            .contact-options {
+                grid-area: contact;
+            }
+
+            .faq-section {
+                grid-area: faq;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="logo">
+            <img src="pnc-personal-banking3931 (1).jpg" alt="PNC Bank Logo">
+            <span>PNC Online Banking</span>
+        </div>
+        <div class="header-controls">
+            <div class="user-avatar">FH</div>
+            <button class="hamburger" id="hamburger">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="dashboard.html"><i class="fas fa-wallet"></i> Accounts</a></li>
+                <li><a href="transfer.html"><i class="fas fa-exchange-alt"></i> Transfer</a></li>
+                <li><a href="paybills.html"><i class="fas fa-money-bill-wave"></i> Pay Bills</a></li>
+                <li><a href="cards.html"><i class="fas fa-credit-card"></i> Cards</a></li>
+                <li><a href="investment.html"><i class="fas fa-chart-line"></i> Investments</a></li>
+                <li><a href="savingsgoal.html"><i class="fas fa-piggy-bank"></i> Savings Goals</a></li>
+                <li><a href="messages.html"><i class="fas fa-envelope"></i> Messages</a></li>
+                <li><a href="statement.html"><i class="fas fa-file-invoice-dollar"></i> Statements</a></li>
+                <li><a href="security.html"><i class="fas fa-user-shield"></i> Security</a></li>
+                <li><a href="help.html" class="active"><i class="fas fa-question-circle"></i> Help</a></li>
+            </ul>
+            
+            <div class="sidebar-footer">
+                <button class="btn-signout" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt" style="margin-right: 10px;"></i>
+                    Sign Out
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="help-header">
+                <h2>Help & Support</h2>
+                <p>Find answers to your questions or contact us for assistance</p>
+            </div>
+
+            <div class="help-dashboard">
+                <!-- Quick Help -->
+                <div class="quick-help">
+                    <h3>Quick Help</h3>
+                    <div class="search-bar">
+                        <input type="text" class="search-input" placeholder="Search help articles...">
+                        <button class="search-btn"><i class="fas fa-search"></i></button>
+                    </div>
+                    <div class="quick-help-grid">
+                        <div class="help-card" id="transferHelp">
+                            <div class="help-icon">
+                                <i class="fas fa-exchange-alt"></i>
+                            </div>
+                            <div class="help-title">Transfer Money</div>
+                            <div class="help-description">Learn how to transfer funds between accounts or to other people</div>
+                        </div>
+                        <div class="help-card" id="billpayHelp">
+                            <div class="help-icon">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <div class="help-title">Pay Bills</div>
+                            <div class="help-description">How to set up and manage bill payments</div>
+                        </div>
+                        <div class="help-card" id="loginHelp">
+                            <div class="help-icon">
+                                <i class="fas fa-sign-in-alt"></i>
+                            </div>
+                            <div class="help-title">Login Issues</div>
+                            <div class="help-description">Troubleshoot problems signing in to your account</div>
+                        </div>
+                        <div class="help-card" id="cardHelp">
+                            <div class="help-icon">
+                                <i class="fas fa-credit-card"></i>
+                            </div>
+                            <div class="help-title">Card Services</div>
+                            <div class="help-description">Report lost/stolen cards or dispute charges</div>
+                        </div>
+                        <div class="help-card" id="mobileHelp">
+                            <div class="help-icon">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <div class="help-title">Mobile Banking</div>
+                            <div class="help-description">Get help with the PNC mobile app</div>
+                        </div>
+                        <div class="help-card" id="securityHelp">
+                            <div class="help-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="help-title">Security Center</div>
+                            <div class="help-description">Protect your account and personal information</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Options -->
+                <div class="contact-options">
+                    <h3>Contact Us</h3>
+                    <div class="contact-methods">
+                        <div class="contact-card">
+                            <div class="contact-icon">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <div class="contact-title">Phone Support</div>
+                            <div class="contact-detail">Available 24/7</div>
+                            <div class="contact-detail">1-888-PNC-BANK</div>
+                            <button class="btn btn-outline btn-block">Call Now</button>
+                        </div>
+                        <div class="contact-card">
+                            <div class="contact-icon">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            <div class="contact-title">Live Chat</div>
+                            <div class="contact-detail">Mon-Fri: 8am-10pm ET</div>
+                            <div class="contact-detail">Sat-Sun: 8am-5pm ET</div>
+                            <button class="btn btn-outline btn-block">Start Chat</button>
+                        </div>
+                        <div class="contact-card">
+                            <div class="contact-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="contact-title">Secure Message</div>
+                            <div class="contact-detail">Response within 1 business day</div>
+                            <div class="contact-detail">&nbsp;</div>
+                            <button class="btn btn-outline btn-block">Send Message</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ Section -->
+                <div class="faq-section">
+                    <h3>Frequently Asked Questions</h3>
+                    <div class="faq-list">
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                How do I reset my password?
+                                <span class="faq-toggle">+</span>
+                            </div>
+                            <div class="faq-answer">
+                                <p>To reset your password:</p>
+                                <ol>
+                                    <li>Click on "Forgot Password" on the login page</li>
+                                    <li>Enter your username and follow the verification steps</li>
+                                    <li>Create a new strong password following our guidelines</li>
+                                    <li>Confirm the new password and click "Submit"</li>
+                                </ol>
+                                <p>You'll receive a confirmation email once your password has been successfully updated.</p>
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                What should I do if I suspect fraudulent activity?
+                                <span class="faq-toggle">+</span>
+                            </div>
+                            <div class="faq-answer">
+                                <p>If you notice any suspicious activity on your account:</p>
+                                <ol>
+                                    <li>Immediately call our Fraud Prevention team at 1-877-287-2667</li>
+                                    <li>Review your recent transactions and report any unauthorized activity</li>
+                                    <li>Consider changing your online banking password</li>
+                                    <li>Monitor your accounts closely for further unusual activity</li>
+                                </ol>
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                How do I set up automatic bill payments?
+                                <span class="faq-toggle">+</span>
+                            </div>
+                            <div class="faq-answer">
+                                <p>To set up automatic bill payments:</p>
+                                <ol>
+                                    <li>Go to the "Pay Bills" section in online banking</li>
+                                    <li>Select the biller you want to pay automatically</li>
+                                    <li>Choose "Set Up Automatic Payments"</li>
+                                    <li>Enter the payment amount and frequency</li>
+                                    <li>Select the account to pay from</li>
+                                    <li>Review and confirm your automatic payment details</li>
+                                </ol>
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                What are the daily transfer limits?
+                                <span class="faq-toggle">+</span>
+                            </div>
+                            <div class="faq-answer">
+                                <p>Our standard transfer limits are:</p>
+                                <ul>
+                                    <li><strong>Between PNC accounts:</strong> $25,000 per day</li>
+                                    <li><strong>To other banks (External Transfers):</strong> $5,000 per day</li>
+                                    <li><strong>PNC Popmoney® transfers:</strong> $2,000 per day</li>
+                                </ul>
+                                <p>Limits may vary based on your account type and history with PNC. You can view your specific limits in the "Transfer Money" section of online banking.</p>
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                How do I update my contact information?
+                                <span class="faq-toggle">+</span>
+                            </div>
+                            <div class="faq-answer">
+                                <p>To update your contact information:</p>
+                                <ol>
+                                    <li>Sign in to online banking</li>
+                                    <li>Go to "Profile & Settings"</li>
+                                    <li>Select "Contact Information"</li>
+                                    <li>Update your phone number, email, or mailing address</li>
+                                    <li>Click "Save Changes"</li>
+                                </ol>
+                                <p>For security reasons, some changes may require verification through a security code sent to your current contact information.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Mobile menu toggle
+        const hamburger = document.getElementById('hamburger');
+        const sidebar = document.getElementById('sidebar');
+        
+        hamburger.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            if (window.innerWidth <= 768) {
+                const isClickInsideSidebar = sidebar.contains(event.target);
+                const isClickOnHamburger = hamburger.contains(event.target);
+                
+                if (!isClickInsideSidebar && !isClickOnHamburger) {
+                    sidebar.classList.remove('active');
+                }
+            }
+        });
+
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            if(confirm('Are you sure you want to sign out?')) {
+                window.location.href = 'index.html';
+            }
+        });
+
+        // FAQ toggle functionality
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', function() {
+                const answer = this.nextElementSibling;
+                const toggle = this.querySelector('.faq-toggle');
+                
+                if (answer.classList.contains('show')) {
+                    answer.classList.remove('show');
+                    toggle.textContent = '+';
+                } else {
+                    answer.classList.add('show');
+                    toggle.textContent = '-';
+                }
+            });
+        });
+
+        // Help card functionality
+        document.querySelectorAll('.help-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const cardId = this.id;
+                let message = '';
+                
+                switch(cardId) {
+                    case 'transferHelp':
+                        message = 'Opening Transfer Money help article...';
+                        break;
+                    case 'billpayHelp':
+                        message = 'Opening Bill Pay help article...';
+                        break;
+                    case 'loginHelp':
+                        message = 'Opening Login Issues help article...';
+                        break;
+                    case 'cardHelp':
+                        message = 'Opening Card Services help article...';
+                        break;
+                    case 'mobileHelp':
+                        message = 'Opening Mobile Banking help article...';
+                        break;
+                    case 'securityHelp':
+                        message = 'Opening Security Center help article...';
+                        break;
+                }
+                
+                alert(message);
+            });
+        });
+
+        // Contact button functionality
+        document.querySelectorAll('.btn-outline').forEach(btn => {
+            if (btn.textContent.includes('Call') || btn.textContent.includes('Chat') || btn.textContent.includes('Message')) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const action = this.textContent.trim();
+                    alert(`Initiating ${action} with PNC customer support...`);
+                });
+            }
+        });
+
+        // Search functionality
+        document.querySelector('.search-btn').addEventListener('click', function() {
+            const query = document.querySelector('.search-input').value;
+            if (query.trim() !== '') {
+                alert(`Searching help articles for: "${query}"`);
+            }
+        });
+
+        // Handle window resize
+        function handleResize() {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+            }
+        }
+
+        window.addEventListener('resize', handleResize);
+    </script>
+</body>
+</html>

@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PNC Bank | Savings Goals</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: #003366;
+            --accent-orange: #FF8200;
+            --light-gray: #F5F5F5;
+            --dark-gray: #333333;
+            --white: #FFFFFF;
+            --success-green: #28a745;
+            --warning-yellow: #ffc107;
+            --info-blue: #17a2b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .dashboard-header {
+            background-color: var(--white);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo img {
+            height: 30px;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--primary-blue);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--primary-blue);
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        /* Main Content */
+        .dashboard-container {
+            display: flex;
+            min-height: calc(100vh - 60px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 0;
+            background-color: var(--primary-blue);
+            color: white;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            height: calc(100vh - 60px);
+            z-index: 900;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.active {
+            width: 250px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 1.5rem 0;
+            flex: 1;
+        }
+
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-menu li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-menu li a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .btn-signout {
+            background-color: transparent;
+            color: white;
+            text-align: left;
+            padding: 0.8rem 1.5rem;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-signout:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            padding: 1.5rem;
+            width: 100%;
+        }
+
+        .savings-header {
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .savings-header h2 {
+            color: var(--primary-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .savings-header p {
+            color: #666;
+        }
+
+        /* Savings Goals Container */
+        .savings-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Goals Summary */
+        .goals-summary {
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .summary-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .summary-card {
+            flex: 1;
+            min-width: 200px;
+            padding: 1rem;
+            border-radius: 8px;
+            color: white;
+        }
+
+        .card-primary {
+            background-color: var(--primary-blue);
+        }
+
+        .card-success {
+            background-color: var(--success-green);
+        }
+
+        .card-warning {
+            background-color: var(--warning-yellow);
+        }
+
+        .card-info {
+            background-color: var(--info-blue);
+        }
+
+        .summary-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-card p {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        /* Goals List */
+        .goals-list {
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .goals-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .goal-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .goal-card:hover {
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .goal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .goal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+
+        .goal-amount {
+            font-weight: 600;
+        }
+
+        .goal-progress {
+            height: 10px;
+            background-color: #eee;
+            border-radius: 5px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--success-green);
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+
+        .goal-details {
+            display: flex;
+            justify-content: space-between;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .goal-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        /* Add Goal Form */
+        .add-goal-form {
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-top: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-blue);
+            outline: none;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .form-col {
+            flex: 1;
+        }
+
+        .btn {
+            padding: 0.7rem 1rem;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #002b57;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary-blue);
+            color: var(--primary-blue);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(0, 51, 102, 0.1);
+        }
+
+        .btn-success {
+            background-color: var(--success-green);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: var(--primary-blue);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        /* Responsive Styles */
+        @media (min-width: 768px) {
+            .sidebar {
+                width: 250px;
+                position: static;
+                height: auto;
+            }
+
+            .main-content {
+                width: calc(100% - 250px);
+            }
+
+            .hamburger {
+                display: none;
+            }
+
+            .savings-container {
+                flex-direction: row;
+                align-items: flex-start;
+            }
+
+            .goals-summary {
+                flex: 1;
+            }
+
+            .goals-list {
+                flex: 2;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="logo">
+            <img src="pnc-personal-banking3931 (1).jpg" alt="PNC Bank Logo">
+            <span>PNC Online Banking</span>
+        </div>
+        <div class="header-controls">
+            <div class="user-avatar">FH</div>
+            <button class="hamburger" id="hamburger">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="dashboard.html"><i class="fas fa-wallet"></i> Accounts</a></li>
+                <li><a href="transfer.html"><i class="fas fa-exchange-alt"></i> Transfer</a></li>
+                <li><a href="paybills.html"><i class="fas fa-money-bill-wave"></i> Pay Bills</a></li>
+                <li><a href="cards.html"><i class="fas fa-credit-card"></i> Cards</a></li>
+                <li><a href="investment.html"><i class="fas fa-chart-line"></i> Investments</a></li>
+                <li><a href="savingsgoal.html" class="active"><i class="fas fa-piggy-bank"></i> Savings Goals</a></li>
+                <li><a href="messages.html"><i class="fas fa-envelope"></i> Messages</a></li>
+                <li><a href="statement.html"><i class="fas fa-file-invoice-dollar"></i> Statements</a></li>
+                <li><a href="security.html"><i class="fas fa-user-shield"></i> Security</a></li>
+                <li><a href="help.html"><i class="fas fa-question-circle"></i> Help</a></li>
+            </ul>
+            
+            <div class="sidebar-footer">
+                <button class="btn-signout" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt" style="margin-right: 10px;"></i>
+                    Sign Out
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="savings-header">
+                <div>
+                    <h2>Savings Goals</h2>
+                    <p>Track and manage your savings objectives</p>
+                </div>
+                <button class="btn btn-primary" id="addGoalBtn">
+                    <i class="fas fa-plus"></i> Add Goal
+                </button>
+            </div>
+
+            <div class="savings-container">
+                <div class="goals-summary">
+                    <h3>Savings Overview</h3>
+                    <div class="summary-cards">
+                        <div class="summary-card card-primary">
+                            <h3>Active Goals</h3>
+                            <p>4</p>
+                        </div>
+                        <div class="summary-card card-success">
+                            <h3>Completed</h3>
+                            <p>2</p>
+                        </div>
+                        <div class="summary-card card-warning">
+                            <h3>Total Saved</h3>
+                            <p>$8,245</p>
+                        </div>
+                        <div class="summary-card card-info">
+                            <h3>Total Goals</h3>
+                            <p>$15,000</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="goals-list">
+                    <div class="goals-header">
+                        <h3>My Savings Goals</h3>
+                        <div>
+                            <button class="btn btn-outline">
+                                <i class="fas fa-filter"></i> Filter
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Goal 1 -->
+                    <div class="goal-card">
+                        <div class="goal-header">
+                            <div class="goal-title">Emergency Fund</div>
+                            <div class="goal-amount">$3,750 / $5,000</div>
+                        </div>
+                        <div class="goal-progress">
+                            <div class="progress-bar" style="width: 75%"></div>
+                        </div>
+                        <div class="goal-details">
+                            <div>Target Date: Dec 2023</div>
+                            <div>75% complete</div>
+                        </div>
+                        <div class="goal-actions">
+                            <button class="btn btn-outline">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-outline">
+                                <i class="fas fa-money-bill-wave"></i> Add Funds
+                            </button>
+                            <button class="btn btn-success">
+                                <i class="fas fa-check"></i> Complete
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Goal 2 -->
+                    <div class="goal-card">
+                        <div class="goal-header">
+                            <div class="goal-title">New Car Down Payment</div>
+                            <div class="goal-amount">$2,500 / $10,000</div>
+                        </div>
+                        <div class="goal-progress">
+                            <div class="progress-bar" style="width: 25%"></div>
+                        </div>
+                        <div class="goal-details">
+                            <div>Target Date: Jun 2024</div>
+                            <div>25% complete</div>
+                        </div>
+                        <div class="goal-actions">
+                            <button class="btn btn-outline">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-outline">
+                                <i class="fas fa-money-bill-wave"></i> Add Funds
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Goal 3 -->
+                    <div class="goal-card">
+                        <div class="goal-header">
+                            <div class="goal-title">Vacation to Hawaii</div>
+                            <div class="goal-amount">$1,500 / $3,000</div>
+                        </div>
+                        <div class="goal-progress">
+                            <div class="progress-bar" style="width: 50%"></div>
+                        </div>
+                        <div class="goal-details">
+                            <div>Target Date: Aug 2023</div>
+                            <div>50% complete</div>
+                        </div>
+                        <div class="goal-actions">
+                            <button class="btn btn-outline">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-outline">
+                                <i class="fas fa-money-bill-wave"></i> Add Funds
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Goal 4 (Completed) -->
+                    <div class="goal-card" style="opacity: 0.7;">
+                        <div class="goal-header">
+                            <div class="goal-title">New Laptop</div>
+                            <div class="goal-amount">$1,200 / $1,200</div>
+                        </div>
+                        <div class="goal-progress">
+                            <div class="progress-bar" style="width: 100%"></div>
+                        </div>
+                        <div class="goal-details">
+                            <div>Completed: May 2023</div>
+                            <div>100% complete</div>
+                        </div>
+                        <div class="goal-actions">
+                            <button class="btn btn-outline">
+                                <i class="fas fa-redo"></i> Restart
+                            </button>
+                            <button class="btn btn-outline">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Goal Modal -->
+            <div class="modal" id="addGoalModal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Create New Savings Goal</h3>
+                        <button class="close-modal" id="closeModal">&times;</button>
+                    </div>
+                    <form id="newGoalForm">
+                        <div class="form-group">
+                            <label>Goal Name</label>
+                            <input type="text" class="form-control" placeholder="e.g. Emergency Fund" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label>Target Amount</label>
+                                    <input type="number" class="form-control" placeholder="0.00" min="1" step="0.01" required>
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group">
+                                    <label>Current Amount</label>
+                                    <input type="number" class="form-control" placeholder="0.00" min="0" step="0.01" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Target Date</label>
+                            <input type="date" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Funding Account</label>
+                            <select class="form-control" required>
+                                <option value="">Select account</option>
+                                <option>Virtual Wallet (••••7890)</option>
+                                <option>Savings Account (••••4567)</option>
+                                <option>Grant Funds (••••1234)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Goal Category</label>
+                            <select class="form-control">
+                                <option value="">Select category</option>
+                                <option>Emergency Fund</option>
+                                <option>Vacation</option>
+                                <option>Vehicle</option>
+                                <option>Home</option>
+                                <option>Education</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline" id="cancelGoal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Create Goal</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Mobile menu toggle
+        const hamburger = document.getElementById('hamburger');
+        const sidebar = document.getElementById('sidebar');
+        
+        hamburger.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            if (window.innerWidth <= 768) {
+                const isClickInsideSidebar = sidebar.contains(event.target);
+                const isClickOnHamburger = hamburger.contains(event.target);
+                
+                if (!isClickInsideSidebar && !isClickOnHamburger) {
+                    sidebar.classList.remove('active');
+                }
+            }
+        });
+
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            if(confirm('Are you sure you want to sign out?')) {
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Modal functionality
+        const addGoalBtn = document.getElementById('addGoalBtn');
+        const addGoalModal = document.getElementById('addGoalModal');
+        const closeModal = document.getElementById('closeModal');
+        const cancelGoal = document.getElementById('cancelGoal');
+        const newGoalForm = document.getElementById('newGoalForm');
+
+        addGoalBtn.addEventListener('click', function() {
+            addGoalModal.style.display = 'flex';
+        });
+
+        closeModal.addEventListener('click', function() {
+            addGoalModal.style.display = 'none';
+        });
+
+        cancelGoal.addEventListener('click', function() {
+            addGoalModal.style.display = 'none';
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === addGoalModal) {
+                addGoalModal.style.display = 'none';
+            }
+        });
+
+        // Form submission
+        newGoalForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Here you would typically handle the form submission
+            alert('New savings goal created successfully!');
+            addGoalModal.style.display = 'none';
+            newGoalForm.reset();
+        });
+
+        // Handle window resize
+        function handleResize() {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+            }
+        }
+
+        window.addEventListener('resize', handleResize);
+    </script>
+</body>
+</html>

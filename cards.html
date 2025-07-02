@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PNC Bank | My Cards</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: #003366;
+            --accent-orange: #FF8200;
+            --light-gray: #F5F5F5;
+            --dark-gray: #333333;
+            --white: #FFFFFF;
+            --success-green: #28a745;
+            --error-red: #dc3545;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .dashboard-header {
+            background-color: var(--white);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo img {
+            height: 30px;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--primary-blue);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--primary-blue);
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        /* Main Content */
+        .dashboard-container {
+            display: flex;
+            min-height: calc(100vh - 60px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 0;
+            background-color: var(--primary-blue);
+            color: white;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            height: calc(100vh - 60px);
+            z-index: 90;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.active {
+            width: 250px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 1.5rem 0;
+            flex: 1;
+        }
+
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-menu li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-menu li a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .btn-signout {
+            background-color: transparent;
+            color: white;
+            text-align: left;
+            padding: 0.8rem 1.5rem;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            padding: 1.5rem;
+            width: 100%;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.7rem 1rem;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        /* Card Styles */
+        .card-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, #004080 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+            color: white;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+        }
+
+        .card-premium {
+            background: linear-gradient(135deg, #4b0082 0%, #800080 100%);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .card-type {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .card-chip {
+            width: 40px;
+            height: 30px;
+            background: linear-gradient(135deg, #ffd700 0%, #d4af37 100%);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-chip i {
+            color: #333;
+            font-size: 1.2rem;
+        }
+
+        .card-number {
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            margin-bottom: 1.5rem;
+            word-spacing: 8px;
+            position: relative;
+        }
+
+        .card-name {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+        }
+
+        .card-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-expiry, .card-cvv {
+            font-size: 0.9rem;
+        }
+
+        .card-expiry span, .card-cvv span {
+            display: block;
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-bottom: 0.3rem;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        .card-logo {
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 1.5rem;
+        }
+
+        .card-btn {
+            padding: 0.6rem 1rem;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
+        }
+
+        .card-btn-primary {
+            background-color: var(--white);
+            color: var(--primary-blue);
+        }
+
+        .card-btn-secondary {
+            background-color: transparent;
+            color: var(--white);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        /* Card Controls */
+        .card-controls {
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .control-group h3 {
+            margin-bottom: 1rem;
+            color: var(--primary-blue);
+        }
+
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .toggle-switch:last-child {
+            border-bottom: none;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--success-green);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Responsive Styles */
+        @media (min-width: 768px) {
+            .sidebar {
+                width: 250px;
+                position: static;
+                height: auto;
+            }
+
+            .main-content {
+                width: calc(100% - 250px);
+            }
+
+            .hamburger {
+                display: none;
+            }
+
+            .card-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 992px) {
+            .card-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="logo">
+            <img src="pnc-personal-banking3931 (1).jpg" alt="PNC Bank Logo">
+            <span>PNC Online Banking</span>
+        </div>
+        <div class="header-controls">
+            <div class="user-avatar">FH</div>
+            <button class="hamburger" id="hamburger">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="dashboard.html"><i class="fas fa-wallet"></i> Accounts</a></li>
+                <li><a href="transfer.html"><i class="fas fa-exchange-alt"></i> Transfer</a></li>
+                <li><a href="paybills.html"><i class="fas fa-money-bill-wave"></i> Pay Bills</a></li>
+                <li><a href="cards.html" class="active"><i class="fas fa-credit-card"></i> Cards</a></li>
+                <li><a href="investment.html"><i class="fas fa-chart-line"></i> Investments</a></li>
+                <li><a href="savings.html"><i class="fas fa-piggy-bank"></i> Savings Goals</a></li>
+                <li><a href="message.html"><i class="fas fa-envelope"></i> Messages</a></li>
+                <li><a href="statement.html"><i class="fas fa-file-invoice-dollar"></i> Statements</a></li>
+                <li><a href="security.html"><i class="fas fa-user-shield"></i> Security</a></li>
+                <li><a href="help.html"><i class="fas fa-question-circle"></i> Help</a></li>
+            </ul>
+            
+            <div class="sidebar-footer">
+                <button class="btn-signout" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt" style="margin-right: 10px;"></i>
+                    Sign Out
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1>My Cards</h1>
+                <button class="btn btn-primary">+ Request New Card</button>
+            </div>
+
+            <div class="card-container">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-type">VISA DEBIT</div>
+                        <div class="card-chip">
+                            <i class="fas fa-microchip"></i>
+                        </div>
+                    </div>
+                    <div class="card-number">•••• •••• •••• 7890</div>
+                    <div class="card-name">FREDRIC HERIOT</div>
+                    <div class="card-details">
+                        <div class="card-expiry">
+                            <span>EXPIRES</span>
+                            05/25
+                        </div>
+                        <div class="card-cvv">
+                            <span>CVV</span>
+                            •••
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="card-logo">VISA</div>
+                        <div class="card-actions">
+                            <button class="card-btn card-btn-secondary show-cvv-btn">Show CVV</button>
+                            <button class="card-btn card-btn-secondary show-number-btn">Show Number</button>
+                            <button class="card-btn card-btn-primary">Manage</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-premium">
+                    <div class="card-header">
+                        <div class="card-type">PREMIUM REWARDS</div>
+                        <div class="card-chip">
+                            <i class="fas fa-microchip"></i>
+                        </div>
+                    </div>
+                    <div class="card-number">•••• •••• •••• 3456</div>
+                    <div class="card-name">FREDRIC HERIOT</div>
+                    <div class="card-details">
+                        <div class="card-expiry">
+                            <span>EXPIRES</span>
+                            11/26
+                        </div>
+                        <div class="card-cvv">
+                            <span>CVV</span>
+                            •••
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="card-logo">VISA</div>
+                        <div class="card-actions">
+                            <button class="card-btn card-btn-secondary show-cvv-btn">Show CVV</button>
+                            <button class="card-btn card-btn-secondary show-number-btn">Show Number</button>
+                            <button class="card-btn card-btn-primary">Manage</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-type">BUSINESS CARD</div>
+                        <div class="card-chip">
+                            <i class="fas fa-microchip"></i>
+                        </div>
+                    </div>
+                    <div class="card-number">•••• •••• •••• 9012</div>
+                    <div class="card-name">FREDRIC HERIOT</div>
+                    <div class="card-details">
+                        <div class="card-expiry">
+                            <span>EXPIRES</span>
+                            08/24
+                        </div>
+                        <div class="card-cvv">
+                            <span>CVV</span>
+                            •••
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="card-logo">MASTERCARD</div>
+                        <div class="card-actions">
+                            <button class="card-btn card-btn-secondary show-cvv-btn">Show CVV</button>
+                            <button class="card-btn card-btn-secondary show-number-btn">Show Number</button>
+                            <button class="card-btn card-btn-primary">Manage</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-controls">
+                <div class="control-group">
+                    <h3>Card Controls</h3>
+                    <div class="toggle-switch">
+                        <span>Lock Card</span>
+                        <label class="switch">
+                            <input type="checkbox">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-switch">
+                        <span>Online Purchases</span>
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-switch">
+                        <span>International Transactions</span>
+                        <label class="switch">
+                            <input type="checkbox">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Mobile menu toggle
+        const hamburger = document.getElementById('hamburger');
+        const sidebar = document.getElementById('sidebar');
+        
+        hamburger.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            if (window.innerWidth <= 768) {
+                const isClickInsideSidebar = sidebar.contains(event.target);
+                const isClickOnHamburger = hamburger.contains(event.target);
+                
+                if (!isClickInsideSidebar && !isClickOnHamburger) {
+                    sidebar.classList.remove('active');
+                }
+            }
+        });
+
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            if(confirm('Are you sure you want to sign out?')) {
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Card data for each card
+        const cardData = [
+            { number: '4532 7589 1234 7890', cvv: '123' },
+            { number: '4916 8234 5678 3456', cvv: '456' },
+            { number: '5555 1234 9876 9012', cvv: '789' }
+        ];
+
+        // Show/Hide CVV functionality
+        document.querySelectorAll('.show-cvv-btn').forEach((btn, index) => {
+            btn.addEventListener('click', function() {
+                const cvvElement = this.closest('.card').querySelector('.card-cvv');
+                if (cvvElement.textContent.includes('•••')) {
+                    cvvElement.innerHTML = `<span>CVV</span>${cardData[index].cvv}`;
+                    this.textContent = 'Hide CVV';
+                } else {
+                    cvvElement.innerHTML = '<span>CVV</span>•••';
+                    this.textContent = 'Show CVV';
+                }
+            });
+        });
+
+        // Show/Hide Card Number functionality
+        document.querySelectorAll('.show-number-btn').forEach((btn, index) => {
+            btn.addEventListener('click', function() {
+                const numberElement = this.closest('.card').querySelector('.card-number');
+                if (numberElement.textContent.includes('••••')) {
+                    numberElement.textContent = cardData[index].number;
+                    this.textContent = 'Hide Number';
+                } else {
+                    numberElement.textContent = '•••• •••• •••• ' + cardData[index].number.slice(-4);
+                    this.textContent = 'Show Number';
+                }
+            });
+        });
+
+        // Handle window resize
+        function handleResize() {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+            }
+        }
+
+        window.addEventListener('resize', handleResize);
+    </script>
+</body>
+</html>

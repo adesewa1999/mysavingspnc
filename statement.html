@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PNC Bank | Statements</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: #003366;
+            --accent-orange: #FF8200;
+            --light-gray: #F5F5F5;
+            --dark-gray: #333333;
+            --white: #FFFFFF;
+            --success-green: #28a745;
+            --error-red: #dc3545;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        /* Header */
+        .dashboard-header {
+            background-color: var(--white);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo img {
+            height: 30px;
+        }
+
+        .logo span {
+            font-size: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--primary-blue);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--primary-blue);
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        /* Main Content */
+        .dashboard-container {
+            display: flex;
+            min-height: calc(100vh - 60px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 0;
+            background-color: var(--primary-blue);
+            color: white;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            height: calc(100vh - 60px);
+            z-index: 90;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.active {
+            width: 250px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 1rem 0;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1rem;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .sidebar-menu li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-menu li a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .sidebar-footer {
+            padding: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .btn-signout {
+            background-color: transparent;
+            color: white;
+            text-align: left;
+            padding: 0.8rem 1rem;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            padding: 1rem;
+            width: 100%;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-header h1 {
+            font-size: 1.5rem;
+            color: var(--primary-blue);
+        }
+
+        .btn {
+            padding: 0.7rem 1rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.9rem;
+            min-width: 120px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: var(--white);
+            color: var(--primary-blue);
+            border: 1px solid var(--primary-blue);
+        }
+
+        /* Filter Controls */
+        .filter-controls {
+            background-color: var(--white);
+            border-radius: 10px;
+            padding: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+            font-weight: 500;
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 0.7rem;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            background-color: var(--white);
+            font-size: 0.9rem;
+        }
+
+        /* Statements Section */
+        .statements-section {
+            background-color: var(--white);
+            border-radius: 10px;
+            padding: 1.2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .section-header h2 {
+            color: var(--primary-blue);
+            font-size: 1.2rem;
+        }
+
+        /* Statement Cards */
+        .statement-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .statement-card {
+            background-color: var(--white);
+            border-radius: 10px;
+            padding: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .statement-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .statement-title {
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+
+        .statement-date {
+            font-size: 0.85rem;
+            color: var(--dark-gray);
+        }
+
+        .statement-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            color: var(--dark-gray);
+            opacity: 0.8;
+            font-size: 0.8rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .detail-value {
+            font-weight: 500;
+        }
+
+        .statement-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 0.6rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            text-align: center;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .view-btn {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .download-btn {
+            background-color: var(--white);
+            color: var(--primary-blue);
+            border: 1px solid var(--primary-blue);
+        }
+
+        /* Transaction Preview */
+        .transaction-preview {
+            margin-top: 1rem;
+            border-top: 1px dashed #eee;
+            padding-top: 1rem;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .transaction-desc {
+            font-size: 0.85rem;
+        }
+
+        .transaction-amount {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .transaction-amount.credit {
+            color: var(--success-green);
+        }
+
+        .transaction-amount.debit {
+            color: var(--error-red);
+        }
+
+        /* Quick Transfer Panel */
+        .quick-transfer {
+            background-color: var(--white);
+            border-radius: 10px;
+            padding: 1.2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+
+        .transfer-form {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+        }
+
+        .form-control {
+            padding: 0.7rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Styles */
+        @media (min-width: 768px) {
+            .sidebar {
+                width: 250px;
+                position: static;
+                height: auto;
+            }
+
+            .main-content {
+                width: calc(100% - 250px);
+                padding: 1.5rem;
+            }
+
+            .hamburger {
+                display: none;
+            }
+
+            .statement-cards {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1.5rem;
+            }
+
+            .statement-card {
+                padding: 1.2rem;
+            }
+
+            .transfer-form {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .form-group:last-child {
+                grid-column: span 2;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .statement-cards {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="logo">
+            <img src="pnc-personal-banking3931 (1).jpg" alt="PNC Bank Logo">
+            <span>PNC Online Banking</span>
+        </div>
+        <div class="header-controls">
+            <div class="user-avatar">FH</div>
+            <button class="hamburger" id="hamburger">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="dashboard.html"><i class="fas fa-wallet"></i> Accounts</a></li>
+                <li><a href="transfer.html"><i class="fas fa-exchange-alt"></i> Transfer</a></li>
+                <li><a href="paybills.html"><i class="fas fa-money-bill-wave"></i> Pay Bills</a></li>
+                <li><a href="cards.html"><i class="fas fa-credit-card"></i> Cards</a></li>
+                <li><a href="investment.html"><i class="fas fa-chart-line"></i> Investments</a></li>
+                <li><a href="savingsgoal.html"><i class="fas fa-piggy-bank"></i> Savings Goals</a></li>
+                <li><a href="messages.html"><i class="fas fa-envelope"></i> Messages</a></li>
+                <li><a href="statement.html" class="active"><i class="fas fa-file-invoice-dollar"></i> Statements</a></li>
+                <li><a href="security.html"><i class="fas fa-user-shield"></i> Security</a></li>
+                <li><a href="help.html"><i class="fas fa-question-circle"></i> Help</a></li>
+            </ul>
+            
+            <div class="sidebar-footer">
+                <button class="btn-signout" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt" style="margin-right: 10px;"></i>
+                    Sign Out
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1>Account Statements</h1>
+                <button class="btn btn-primary" id="exportAllBtn">
+                    <i class="fas fa-file-export"></i> Export All
+                </button>
+            </div>
+
+            <!-- Quick Transfer Panel (Connected to Transfer Page) -->
+            <div class="quick-transfer">
+                <div class="section-header">
+                    <h2>Quick Transfer</h2>
+                </div>
+                <form class="transfer-form" id="quickTransferForm">
+                    <div class="form-group">
+                        <label for="from-account">From Account</label>
+                        <select id="from-account" class="form-control" required>
+                            <option value="">Select Account</option>
+                            <option value="checking">Checking (•••3456) - $9,120.45</option>
+                            <option value="savings">Savings (•••7890) - $15,678.90</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="to-account">To Account</label>
+                        <select id="to-account" class="form-control" required>
+                            <option value="">Select Account</option>
+                            <option value="savings">Savings (•••7890)</option>
+                            <option value="external">External Account</option>
+                            <option value="credit-card">Credit Card (•••9012)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="transfer-amount">Amount</label>
+                        <input type="number" id="transfer-amount" class="form-control" placeholder="0.00" required>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Transfer Now
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Filter Controls -->
+            <div class="filter-controls">
+                <div class="filter-group">
+                    <label for="account-select">Account</label>
+                    <select id="account-select" class="filter-select">
+                        <option>All Accounts</option>
+                        <option>Checking (•••3456)</option>
+                        <option>Savings (•••7890)</option>
+                        <option>Credit Card (•••9012)</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="period-select">Period</label>
+                    <select id="period-select" class="filter-select">
+                        <option>Last 12 Months</option>
+                        <option>Last 6 Months</option>
+                        <option>Last 3 Months</option>
+                        <option>Custom Range</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="type-select">Statement Type</label>
+                    <select id="type-select" class="filter-select">
+                        <option>All Statements</option>
+                        <option>Monthly</option>
+                        <option>Quarterly</option>
+                        <option>Annual</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Statements Section -->
+            <div class="statements-section">
+                <div class="section-header">
+                    <h2>Recent Statements</h2>
+                    <div>
+                        <button class="btn btn-secondary" id="viewAllBtn">View All</button>
+                    </div>
+                </div>
+
+                <div class="statement-cards">
+                    <!-- Checking Account Statement -->
+                    <div class="statement-card">
+                        <div class="statement-header">
+                            <div class="statement-title">Checking Account</div>
+                            <div class="statement-date">Oct 2023</div>
+                        </div>
+                        <div class="statement-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Account Number</div>
+                                <div class="detail-value">•••3456</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Statement Period</div>
+                                <div class="detail-value">Oct 1 - Oct 31</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Opening Balance</div>
+                                <div class="detail-value">$8,245.67</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Closing Balance</div>
+                                <div class="detail-value">$9,120.45</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Sample Transactions (Connected to Dashboard) -->
+                        <div class="transaction-preview">
+                            <div class="transaction-item">
+                                <div class="transaction-desc">Paycheck Deposit</div>
+                                <div class="transaction-amount credit">+$3,250.00</div>
+                            </div>
+                            <div class="transaction-item">
+                                <div class="transaction-desc">Transfer to Savings</div>
+                                <div class="transaction-amount debit">-$500.00</div>
+                            </div>
+                            <div class="transaction-item">
+                                <div class="transaction-desc">Grocery Store</div>
+                                <div class="transaction-amount debit">-$127.45</div>
+                            </div>
+                        </div>
+                        
+                        <div class="statement-actions">
+                            <button class="action-btn view-btn" data-statement="checking-oct-2023">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                            <button class="action-btn download-btn" data-statement="checking-oct-2023">
+                                <i class="fas fa-download"></i> Download
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Credit Card Statement -->
+                    <div class="statement-card">
+                        <div class="statement-header">
+                            <div class="statement-title">Premium Rewards Card</div>
+                            <div class="statement-date">Oct 2023</div>
+                        </div>
+                        <div class="statement-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Account Number</div>
+                                <div class="detail-value">•••9012</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Statement Period</div>
+                                <div class="detail-value">Oct 1 - Oct 31</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Payment Due</div>
+                                <div class="detail-value">$245.60</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Due Date</div>
+                                <div class="detail-value">Nov 15</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Sample Transactions -->
+                        <div class="transaction-preview">
+                            <div class="transaction-item">
+                                <div class="transaction-desc">Amazon Purchase</div>
+                                <div class="transaction-amount debit">-$89.99</div>
+                            </div>
+                            <div class="transaction-item">
+                                <div class="transaction-desc">Gas Station</div>
+                                <div class="transaction-amount debit">-$45.75</div>
+                            </div>
+                            <div class="transaction-item">
+                                <div class="transaction-desc">Restaurant</div>
+                                <div class="transaction-amount debit">-$67.32</div>
+                            </div>
+                        </div>
+                        
+                        <div class="statement-actions">
+                            <button class="action-btn view-btn" data-statement="cc-oct-2023">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                            <button class="action-btn download-btn" data-statement="cc-oct-2023">
+                                <i class="fas fa-download"></i> Download
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Savings Account Statement -->
+                    <div class="statement-card">
+                        <div class="statement-header">
+                            <div class="statement-title">Savings Account</div>
+                            <div class="statement-date">Sep 2023</div>
+                        </div>
+                        <div class="statement-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Account Number</div>
+                                <div class="detail-value">•••7890</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Statement Period</div>
+                                <div class="detail-value">Sep 1 - Sep 30</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Interest Earned</div>
+                                <div class="detail-value">$12.45</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Closing Balance</div>
+                                <div class="detail-value">$15,678.90</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Sample Transactions -->
+                        <div class="transaction-preview">
+                            <div class="transaction-item">
+                                <div class="transaction-desc">Interest Earned</div>
+                                <div class="transaction-amount credit">+$12.45</div>
+                            </div>
+                            <div class="transaction-item">
+                                <div class="transaction-desc">Transfer from Checking</div>
+                                <div class="transaction-amount credit">+$500.00</div>
+                            </div>
+                            <div class="transaction-item">
+                                <div class="transaction-desc">Automatic Savings</div>
+                                <div class="transaction-amount credit">+$200.00</div>
+                            </div>
+                        </div>
+                        
+                        <div class="statement-actions">
+                            <button class="action-btn view-btn" data-statement="savings-sep-2023">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                            <button class="action-btn download-btn" data-statement="savings-sep-2023">
+                                <i class="fas fa-download"></i> Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Mobile menu toggle
+        const hamburger = document.getElementById('hamburger');
+        const sidebar = document.getElementById('sidebar');
+        
+        hamburger.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            if (window.innerWidth <= 768) {
+                const isClickInsideSidebar = sidebar.contains(event.target);
+                const isClickOnHamburger = hamburger.contains(event.target);
+                
+                if (!isClickInsideSidebar && !isClickOnHamburger) {
+                    sidebar.classList.remove('active');
+                }
+            }
+        });
+
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            if(confirm('Are you sure you want to sign out?')) {
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Handle window resize
+        function handleResize() {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+            }
+        }
+
+        window.addEventListener('resize', handleResize);
+
+        // Quick Transfer Form Submission
+        document.getElementById('quickTransferForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const fromAccount = document.getElementById('from-account').value;
+            const toAccount = document.getElementById('to-account').value;
+            const amount = document.getElementById('transfer-amount').value;
+            
+            // In a real app, this would process the transfer
+            console.log('Transfer initiated:', { fromAccount, toAccount, amount });
+            
+            // Show success message
+            alert(`Success! $${amount} transferred from ${fromAccount} to ${toAccount}`);
+            
+            // Reset form
+            this.reset();
+            
+            // In a real app, you would refresh the statements/transactions
+        });
+
+        // Statement View/Download Buttons
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const statementId = this.getAttribute('data-statement');
+                // In a real app, this would open the statement viewer
+                console.log('View statement:', statementId);
+                window.location.href = `statement-detail.html?id=${statementId}`;
+            });
+        });
+
+        document.querySelectorAll('.download-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const statementId = this.getAttribute('data-statement');
+                // In a real app, this would download the PDF
+                console.log('Download statement:', statementId);
+                alert(`Downloading statement: ${statementId}.pdf`);
+            });
+        });
+
+        // Export All Button
+        document.getElementById('exportAllBtn').addEventListener('click', function() {
+            // In a real app, this would export all statements
+            console.log('Export all statements');
+            alert('All statements exported as PDFs in a ZIP file');
+        });
+
+        // View All Button
+        document.getElementById('viewAllBtn').addEventListener('click', function() {
+            // In a real app, this would show all statements
+            console.log('View all statements');
+            window.location.href = 'statement-archive.html';
+        });
+
+        // Filter functionality
+        document.querySelectorAll('.filter-select').forEach(select => {
+            select.addEventListener('change', function() {
+                // In a real app, this would filter the statements
+                console.log('Filter changed:', this.id, this.value);
+            });
+        });
+    </script>
+</body>
+</html>

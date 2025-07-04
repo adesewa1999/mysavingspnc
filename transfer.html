@@ -476,6 +476,23 @@
                 display: none;
             }
         }
+
+        /* New styles for account verification */
+        .verified-account {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--success-green);
+        }
+        
+        .verified-account p {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -624,6 +641,13 @@
                                 <input type="text" class="form-control" id="bsbNumber" placeholder="Enter BSB number">
                                 <small style="color: #666; display: block; margin-top: 0.5rem;">The Bank State Branch (BSB) is 6 digits long</small>
                             </div>
+                            <!-- Add this new verified account container -->
+                            <div class="form-group" id="verifiedAccountContainer" style="display: none;">
+                                <label>Verified Account Name</label>
+                                <div class="verified-account">
+                                    <p><i class="fas fa-check-circle" style="color: var(--success-green);"></i> <span id="verifiedAccountName">Account Holder Name</span></p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -711,6 +735,7 @@
         <div class="success-details">
             <p><strong>From:</strong> <span id="successFrom">Virtual Wallet (••••7890)</span></p>
             <p><strong>To:</strong> <span id="successTo">Savings Account (••••4567)</span></p>
+            <p id="recipientNameField" style="display: none;"><strong>Recipient Name:</strong> <span id="successRecipientName"></span></p>
             <p><strong>Amount:</strong> <span id="successAmount">$100.00</span></p>
             <p><strong>Date:</strong> <span id="successDate">June 27, 2023</span></p>
             <p><strong>Reference:</strong> <span id="successRef">TX-987654321</span></p>
@@ -777,6 +802,42 @@
                 `Available: ${formatCurrency(accounts[ACCOUNT_TYPES.SAVINGS].balance)}`;
             document.getElementById('from-grant-balance').textContent = 
                 `Available: ${formatCurrency(accounts[ACCOUNT_TYPES.GRANT].balance)}`;
+
+            // Mock database of valid account numbers and names
+            const ACCOUNT_DATABASE = {
+                "06245310546178": { name: "FREDRIC HERIOT", bsb: "062453" },
+                "987654321": { name: "Sarah Johnson", bsb: "654321" },
+                "456789123": { name: "Robert Williams", bsb: "789123" }
+            };
+
+            // Account verification function
+            function verifyAccountDetails() {
+                const accountNumber = document.getElementById('externalAccountNumber').value;
+                const bsbNumber = document.getElementById('bsbNumber').value;
+                const verifiedContainer = document.getElementById('verifiedAccountContainer');
+                const verifiedNameField = document.getElementById('verifiedAccountName');
+
+                // Clear previous result
+                verifiedContainer.style.display = 'none';
+                
+                // Only check if both fields have valid length
+                if (accountNumber.length >= 5 && bsbNumber.length === 6) {
+                    // Simulate API call delay
+                    setTimeout(() => {
+                        // Check mock database
+                        const accountInfo = ACCOUNT_DATABASE[accountNumber];
+                        
+                        if (accountInfo && accountInfo.bsb === bsbNumber) {
+                            verifiedNameField.textContent = accountInfo.name;
+                            verifiedContainer.style.display = 'block';
+                        }
+                    }, 800); // Simulate network delay
+                }
+            }
+
+            // Add event listeners for account verification
+            document.getElementById('externalAccountNumber').addEventListener('input', verifyAccountDetails);
+            document.getElementById('bsbNumber').addEventListener('input', verifyAccountDetails);
 
             // Transfer type toggle
             document.getElementById('transferType').addEventListener('change', function() {
@@ -864,6 +925,7 @@
                     const bankName = document.getElementById('bankName').value;
                     const accountNumber = document.getElementById('externalAccountNumber').value;
                     const bsbNumber = document.getElementById('bsbNumber').value;
+                    const verifiedName = document.getElementById('verifiedAccountName').textContent;
                     
                     if (!bankName) {
                         alert('Please select a bank');
@@ -877,6 +939,11 @@
                     
                     if (!bsbNumber || bsbNumber.length !== 6) {
                         alert('Please enter a valid 6-digit BSB number');
+                        return;
+                    }
+                    
+                    if (verifiedName === 'Account Holder Name') {
+                        alert('Please verify the account details first');
                         return;
                     }
                     
@@ -897,7 +964,8 @@
                     amount: amount,
                     description: document.getElementById('description')?.value || "Transfer",
                     date: new Date().toISOString(),
-                    type: transferType
+                    type: transferType,
+                    recipientName: transferType === 'external' ? document.getElementById('verifiedAccountName').textContent : null
                 };
 
                 // Store transfer data
@@ -945,6 +1013,16 @@
                         `${transferData.fromName} (${transferData.fromNumber})`;
                     document.getElementById('successTo').textContent = 
                         `${transferData.toName} (${transferData.toNumber})`;
+                    
+                    // Show recipient name if external transfer
+                    const recipientNameField = document.getElementById('recipientNameField');
+                    if (transferData.recipientName) {
+                        document.getElementById('successRecipientName').textContent = transferData.recipientName;
+                        recipientNameField.style.display = 'block';
+                    } else {
+                        recipientNameField.style.display = 'none';
+                    }
+                    
                     document.getElementById('successAmount').textContent = 
                         formatCurrency(transferData.amount);
                     document.getElementById('successDate').textContent = 
